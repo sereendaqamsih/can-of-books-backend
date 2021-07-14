@@ -4,7 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/user', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MONGODB, { useNewUrlParser: true, useUnifiedTopology: true });
 const app = express();
 app.use(cors());
 
@@ -79,5 +79,28 @@ function deleteBookHandler (req,res) {
       }
 
   })
+}
+app.put('/updateBook/:bookId',updateBookHandler);
+
+function updateBookHandler (req,res) {
+  console.log(req.body);
+
+  let {updateTitle,updateDescription,updateLink,updateStatus,email} = req.body;
+  let index = Number(req.params.bookId);
+  myUserModel.findOne({email:email},(error,updatedBook)=>{
+      if(error){ res.send('error in finding the data')}
+      else {
+          updatedBook.book.splice( index,1,{
+              name:updateTitle,
+              description:updateDescription,
+              status:updateStatus,
+              img:updateLink,
+          })
+          updatedBook.save();
+          res.send(updatedBook.book)
+          
+      }
+  })
+
 }
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
